@@ -8,22 +8,32 @@ class App:
     W, H = 800, 450
     VC = CV.VideoCapture(0)
 
+    filters = {
+        "RGB": CV.COLOR_BGR2RGB,
+        "GRAY": CV.COLOR_BGR2GRAY,
+    }
+
     def __init__(self) -> None:
         self.app = TK.Tk(className="Test")
         self.app.bind("<Escape>", lambda _: self.app.quit())
 
-        change_filter = TK.Button(self.app, text="Change Filter")
-        change_filter.pack()
+        controls = TK.Frame(self.app)
+        controls.grid()
+        TK.Label(controls, text="Filter:").grid(column=0, row=0)
+
+        self.filter = TK.StringVar(controls, "RGB")
+        change_filter = TK.OptionMenu(controls, self.filter, *self.filters.keys())
+        change_filter.grid(column=1, row=0)
 
         self.label = TK.Label(self.app)
-        self.label.pack()
+        self.label.grid()
 
         self.open_camera()
 
     def open_camera(self):
         _, frame = self.VC.read()
         frame = CV.resize(frame, (800, 450))
-        frame = CV.cvtColor(frame, CV.COLOR_BGR2RGB)
+        frame = CV.cvtColor(frame, self.filters[self.filter.get()])
 
         image = Image.fromarray(frame)
         image = ImageTk.PhotoImage(image=image)
@@ -34,4 +44,6 @@ class App:
 
 app = App().app
 app.mainloop()
+
+
 
